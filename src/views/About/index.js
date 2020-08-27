@@ -11,17 +11,13 @@ import {
 import "antd/dist/antd.css";
 
 
-function LandingPage() {
+function AboutPage() {
 
   return (
     <div className="mainLanding"> 
-      <Carousel autoplay>
-        <div >
-          <div className="contentSlide">sadsd</div>
-        </div>
-      </Carousel>
+      <h1>AboutPage</h1>
     </div>
   );
 }
 
-export default LandingPage;
+export default AboutPage;

@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import MainRouter from './routes.js';
 import logo from './logo.svg';
 import './App.css';
 import {
-  Link
+  Link,
+  BrowserRouter as Router,
+  useLocation
 } from "react-router-dom";
 import { 
   Layout, 
@@ -16,179 +18,204 @@ import {
   Typography,
   Form,
   Input,
-  Checkbox
+  Checkbox,
+  Dropdown,
+  Affix,
+  Spin
 } from 'antd';
 import "antd/dist/antd.css";
 import { 
   HomeOutlined,
   UploadOutlined, 
   UserOutlined, 
+  DownOutlined,
+  PieChartOutlined,
   LaptopOutlined, 
   NotificationOutlined, 
-  VideoCameraOutlined 
+  VideoCameraOutlined,
+  MenuFoldOutlined
 } from '@ant-design/icons';
 import fire from './config/Fire';
-
-export const AuthContext = React.createContext();
+import AuthContext from './Auth';
 
 const { SubMenu } = Menu;
 const { Header, Footer, Sider, Content } = Layout;
-const { Text } = Typography;
+const { Text, Title } = Typography;
+
+
+
+function sider() {
+
+  return(
+    <Sider className="mainSide">
+      <div className="logoSide"></div>
+
+      <Menu
+        defaultSelectedKeys={['1']}
+        theme="dark"
+      >
+        <Menu.Item key="1" icon={<PieChartOutlined />}>
+          Dashboard
+        </Menu.Item>
+        <Menu.Item key="2" icon={<PieChartOutlined />}>
+          Products
+        </Menu.Item>
+        <Menu.Item key="3" icon={<PieChartOutlined />}>
+          Users
+        </Menu.Item>
+        <Menu.Item key="4" icon={<PieChartOutlined />}>
+          Dashboard
+        </Menu.Item>
+      </Menu>
+    </Sider>
+  )
+}
+
+
+
+
 function App() {
-
-  const [user, setUser] = useState(null)
-
-  useEffect(() =>{
-    fire.auth().onAuthStateChanged(setUser);
-    console.log(user);
-  }, [])
-
-  const [authModal, setAuthModal] = useState({
-    visibility: true,
-    type: false
+  const [currentUser, setCurrentUser] = useState();
+  const [layout, setLayout] = useState({
+    header: true,
+    footer: true
   })
 
-  const authHandle = async (value) => {
-    console.log(value.email);
-    if(authModal.type === true){
-      await fire.auth().createUserWithEmailAndPassword(value.email, value.password).catch(function(error) {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // ...
-        console.log("Register "+errorMessage);
-      }); 
-    }else{
-      await fire.auth().signInWithEmailAndPassword(value.email, value.password).catch(function(error) {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // ...
-        console.log("Login "+errorMessage);
-      });
-    }
-  }
+  useEffect(() => {
+    fire.auth().onAuthStateChanged(function(user){
+      console.log(user.uid);
+      if(user){
+        fire.database().ref('/users/' + user.uid).once('value').then(function(snapshot) {
+          console.log(snapshot.val());
+          setCurrentUser({
+            email: user.email,
+            firstname: snapshot.val().firstname,
+            lastname: snapshot.val().lastname,
+            type: snapshot.val().type
+          })
+        });
+      }else{
+        setCurrentUser(null);
+      }
+    });
+  }, [])
 
-  const showModal = () => {
-    console.log("open bick");
-    setAuthModal({
-      visibility: true
-    })
-  }
-
-  const handleCancel = () => {
-    console.log("close");
-    setAuthModal({
-      visibility: false
-    })
-  }
-
-  const onChangeType = () => {
-    setAuthModal({
-      type: !authModal.type,
-      visibility: true
-    })
-  }
+  const menu = (
+    <Menu 
+      theme="light"  
+      mode="horizontal" 
+      defaultSelectedKeys={['1']}
+      className="menuDropdown"
+      >
+      <Menu.Item key="1"><Link to="/">HOME</Link></Menu.Item>
+      <Menu.Item key="2"><Link to="/about">ABOUT</Link></Menu.Item>
+      <Menu.Item key="3"><Link to="/projects">PROJECTS</Link></Menu.Item>
+      <Menu.Item key="4"><Link to="/services">SERVICES</Link></Menu.Item>
+      <Menu.Item key="5"><Link to="/blogs">BLOG</Link></Menu.Item>
+      <Menu.Item key="6"><Link to="/contact">CONTACT</Link></Menu.Item>
+    </Menu>
+  )
 
   return (
-  <AuthContext.Provider value={{user}}>
-    <Layout>
-      <Layout>
-        <Header>    
-          <Text strong style={{fontSize: '24px', float: 'left', color: 'white', margin: 'auto'}}>Online Shopping</Text>
-          <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['2']}>
-            <Menu.Item key="1">nav 1</Menu.Item>
-            <Menu.Item key="2">nav 2</Menu.Item>
-            <Menu.Item key="3">nav 3</Menu.Item>
-            {user ?? <Button 
-              style={{float: 'right', marginTop: '13px'}} 
-              type="primary" 
-              shape="round" 
-              icon={<UserOutlined />} 
-              size="large"
-              onClick={showModal}  
-            >
-              Login / Register
-            </Button>}
-          </Menu>
-           <Modal
-            centered={true}
-            visible={authModal.visibility}
-            onCancel={handleCancel}
-            footer={false}
-            width={420}
-            bodyStyle={{
-              paddingTop: '10px'
-            }
-            }
-          > 
-            <Form
-              name="basic"
-              initialValues={{ remember: true }}
-              onFinish={authHandle}
-            >
-              <Text strong style={{fontSize: '24px', display: 'block', textAlign: 'center', color: 'black', margin: '20px auto'}}>Online Shopping</Text>
-              <Row gutter={[16]}>
-                <Col span={12}>
-                  {authModal.type === true ? 
-                  <Form.Item
-                    name="firstName"
-                    rules={[{ required: true, message: 'First name is required!' }]}
+    <Router>
+      <AuthContext.Provider value={{currentUser, setCurrentUser, setLayout}}>
+        <Layout>
+          {layout.header ? 
+            <Affix offsetTop={0}>
+              <Header 
+                className="mainHeader"
+              >
+                <div class="container">
+                  <div class="logo"></div>
+                  <Title className="textLogo">Deviant IT Solutions</Title>
+                  
+                  <Dropdown overlay={menu} trigger={['click']}>
+                    <MenuFoldOutlined className="dropdownMenu" onClick={e => e.preventDefault()}/>
+                  </Dropdown>
+                  <Menu 
+                    theme="dark"  
+                    mode="horizontal" 
+                    defaultSelectedKeys={['1']}
+                    className="headerMenu"
+                    >
+                    <Menu.Item key="1"><Link to="/">HOME</Link></Menu.Item>
+                    <Menu.Item key="2"><Link to="/about">ABOUT</Link></Menu.Item>
+                    <Menu.Item key="3"><Link to="/projects">PROJECTS</Link></Menu.Item>
+                    <Menu.Item key="4"><Link to="/services">SERVICES</Link></Menu.Item>
+                    <Menu.Item key="5"><Link to="/blogs">BLOG</Link></Menu.Item>
+                    <Menu.Item key="6"><Link to="/contact">CONTACT</Link></Menu.Item>
+                  </Menu>
+                </div>
+              </Header>
+          </Affix>
+          :<></>
+          }
+          <Content>       
+            <MainRouter/>
+          </Content>
+          {layout.footer ?
+          <Footer style={{background: 'white'}}>
+            <div class="container">
+              <Row gutter={[16,16]} >
+                <Col xs={12} sm={12} md={12} lg={6} xl={4}>
+                  <Text strong style={{fontSize: '20px'}}>Links</Text>
+                  <Menu 
+                    theme="light"  
+                    mode="vertical" 
+                    className="footerLinks"
                   >
-                    <Input placeholder="First Name"/>
-                  </Form.Item>
-                  :<></>}
+                    <Menu.Item key="1"><Link to="/">HOME</Link></Menu.Item>
+                    <Menu.Item key="2"><Link to="/about">ABOUT</Link></Menu.Item>
+                    <Menu.Item key="3"><Link to="/projects">PROJECTS</Link></Menu.Item>
+                    <Menu.Item key="4"><Link to="/services">SERVICES</Link></Menu.Item>
+                    <Menu.Item key="5"><Link to="/blogs">BLOG</Link></Menu.Item>
+                    <Menu.Item key="6"><Link to="/contact">CONTACT</Link></Menu.Item>
+                  </Menu>
                 </Col>
-                <Col span={12}>
-                  {authModal.type === true ? 
-                  <Form.Item
-                    name="lastName"
-                    rules={[{ required: true, message: 'Last name is required!' }]}
+                <Col xs={12} sm={12} md={12} lg={6} xl={4}>
+                  <Text strong style={{fontSize: '20px'}}>Projects</Text> 
+                  <Menu 
+                    theme="light"  
+                    mode="vertical" 
+                    className="footerLinks"
                   >
-                    <Input placeholder="Last Name"/>
-                  </Form.Item>
-                  :<></>}
+                    <Menu.Item key="1">E-Learning</Menu.Item>
+                    <Menu.Item key="2">Inventory System</Menu.Item>
+                    <Menu.Item key="3">Employee Management</Menu.Item>
+                    <Menu.Item key="4">Business Support System</Menu.Item>
+                  </Menu>
+                </Col>
+                <Col xs={24} sm={12} md={6} lg={4} xl={4}>
+                  <Text strong style={{fontSize: '20px'}}>Location</Text> 
+                  <Menu 
+                    theme="light"  
+                    mode="vertical" 
+                    className="footerLinks"
+                  >
+                    <Menu.Item key="1">Cebu City, Philippines</Menu.Item>
+                    <Menu.Item key="2">Kuala lumpur, Malaysia</Menu.Item>
+                  </Menu>
+                </Col>
+                <Col span={4}></Col>
+                
+                <Col span={4}></Col>
+              </Row>
+              <Row>
+                <Col>
+                  <span class="copyright">© 2020 Deviant IT Solutions. All rights reserved. <a href="/privacy-policy" target="_blank">Privacy Policy</a> </span>
                 </Col>
               </Row>
-              <Form.Item
-                name="email"
-                rules={[{ required: true, message: 'Please input your email!' }]}
-              >
-                <Input placeholder="Email"/>
-              </Form.Item>
+            </div>
+          </Footer>
+          :<></>
+          }
+        </Layout>
+      </AuthContext.Provider>
+    </Router>
+  )
 
-              <Form.Item
-                name="password"
-                rules={[{ required: true, message: 'Please input your password!' }]}
-              >
-                <Input.Password placeholder="Password"/>
-              </Form.Item>
-              <Form.Item>
-                <Button type="primary" htmlType="submit" style={{width: '100%', float: 'right'}}>
-                  {authModal.type === true ? <>Register</> : <>Login</>}
-                </Button>
-              </Form.Item>
-              {authModal.type === true
-                ? <Text style={{display: 'block',textAlign: 'center'}}>Already have an account?<Button onClick={onChangeType} type="link" style={{paddingLeft:'1px'}}>Sign In</Button></Text>
-                : <Text style={{display: 'block',textAlign: 'center'}}>Don't have an account?<Button onClick={onChangeType} type="link" style={{paddingLeft:'1px'}}>Sign Up</Button></Text>
-              }
-
-              <Button type="link" style={{display: 'block', margin: 'auto'}}>Forgot Password?</Button>
-            </Form>
-          </Modal>
-        </Header>
-        <Content style={{
-            padding: 24,
-            margin: 0,
-            minHeight: 280,
-          }}>       
-          <MainRouter/>
-        </Content>
-        <Footer style={{ textAlign: 'center' }}>Online Shop CopyRight by JuanGrayDev</Footer>
-      </Layout>
-    </Layout>
-  </AuthContext.Provider>
-  );
+  
 }
+
 
 export default App;

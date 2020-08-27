@@ -1,22 +1,54 @@
-import React from "react";
+import React, {useContext} from "react";
 import {
   BrowserRouter as Router,
   Switch,
   Route,
   Redirect
 } from "react-router-dom";
-import { LandingPage } from "./views";
+import AuthContext from './Auth';
+import { 
+  LandingPage, 
+  ProductgPage, 
+  DashboardAdmin,
+  HomePage,
+  ContactPage,
+  BlogPage,
+  ServicePage,
+  ProjectPage,
+  AboutPage,
+  LoginAdmin,
+
+} from "./views";
 
 const MainRouter = (props) => {
 
+  const { currentUser } =useContext(AuthContext);
+
   return (
-    <Router>
-      <Switch>
-        <Route exact strict path="/">
-          <LandingPage/>
-        </Route>
-      </Switch>
-    </Router>
+    <Switch>
+      <Route exact strict path="/">
+        <HomePage/>
+      </Route>
+      <Route exact strict path="/about">
+        <AboutPage/>
+      </Route>
+      <Route exact strict path="/projects">
+        <ProjectPage/>
+      </Route>
+      <Route exact strict path="/services">
+        <ServicePage/>
+      </Route>
+      <Route exact strict path="/blogs">
+        <BlogPage/>
+      </Route>
+      <Route exact strict path="/contact">
+        <ContactPage/>
+      </Route>
+
+      <Route exact strict path="/login">
+        <LoginAdmin/>
+      </Route>
+    </Switch>
   );
 }
 
