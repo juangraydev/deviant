@@ -44,9 +44,12 @@ const MainRouter = (props) => {
       <Route exact strict path="/contact">
         <ContactPage/>
       </Route>
-
       <Route exact strict path="/login">
         <LoginAdmin/>
+      </Route>
+
+      <Route exact strict path="/admin/dashboard">
+        <DashboardAdmin/>
       </Route>
     </Switch>
   );

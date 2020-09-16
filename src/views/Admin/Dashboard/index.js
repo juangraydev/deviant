@@ -12,10 +12,19 @@ import "antd/dist/antd.css";
 import AuthContext from '../../../Auth';
 
 function DashboardAdmin() {
+  const {setLayout} = useContext(AuthContext);
+
   
+  useEffect(() => {
+    setLayout({
+      footer: false,
+      header: false,
+      sider: true
+    })
+  }, [])
   return (
     <Row>
-      <Col>asdasd</Col>
+      <Col>DashboardAdmin</Col>
     </Row>
   );
 }

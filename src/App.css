@@ -8,14 +8,21 @@
   }
   .menuDropdown {
     width: 100vw;
-    top: 5px;
+    top: 15px;
   }
 }
 
+.logoBox {
+  position: absolute;
+  display: inline-block;
+  margin: auto;
+  left: 50%;
+  top: 4%;
+  transform: translate(-50%, -50%);
+}
 .logo {
   background: url('./images/deviant_logo.png');
   background-size: 75px 75px;
-  display: inline-block;
   height: 75px;
   width: 60px;
 }
@@ -31,10 +38,11 @@
 
 .dropdownMenu {
   display: none;
-  padding: 20px;
   color: white;
   font-size: x-large;
   float: right;
+  position: relative;
+  top: -45px;
 }
 
 .container {
@@ -42,19 +50,32 @@
   margin: auto;
 }
 .mainHeader {
-  height: 82px;
-  background-color: #1C4597!important;
+  /* height: 82px; */
   padding: 9px 10px;
   z-index: 999;
 }
 
-.headerMenu {
+.headerMenu{
   float: right;
+}
+.headerMenu > a {
+  color: hsla(0,0%,100%,.65)!important;
+}
+.ant-card-bordered {
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+}
+.ant-menu-dark.ant-menu-horizontal > .ant-menu-item:hover {
+  background: none;
 }
 
 ul.ant-menu.headerMenu.ant-menu-dark.ant-menu-root.ant-menu-horizontal {
   background: transparent;
-  /* padding: 0 20px; */
+  /* padding:  0 20px; */
+}
+.ant-layout-header .ant-menu {
+  line-height: inherit;
+  background: transparent;
 }
 
 li.ant-menu-item.ant-menu-item-only-child.ant-menu-item-selected {
@@ -68,6 +89,13 @@ li.ant-menu-item.ant-menu-item-only-child.ant-menu-item-selected {
   position: relative;
   bottom: 30px;
 }
+.footerLinks li.ant-menu-item.ant-menu-item-only-child {
+  padding: 0px;
+}
+.footerLinks .ant-menu-item-selected {
+  color: rgba(0, 0, 0, 0.65)!important;
+}
+
 .footerLinks.ant-menu.footerLinks.ant-menu-light.ant-menu-root.ant-menu-vertical {
   border-right: none;
 }
